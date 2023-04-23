@@ -16,7 +16,8 @@
 #include <linux/sched.h>
 #include <linux/jiffies.h>
 
-// carbon monoxide AIN0 and GPIO44
+
+// carbon monoxide  and GPIO44
 #define MQ7_PIN 44
 
 
@@ -34,7 +35,7 @@ static ssize_t carbonmonoxide_read(struct file *filp, char *buf, size_t count, l
 static ssize_t carbonmonoxide_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos);
 static int carbonmonoxide_open(struct inode *inode, struct file *filp);
 static int carbonmonoxide_release(struct inode *inode, struct file *filp);
-void mytimer_callback(struct timer_list *timer);
+
 
 struct file_operations carbonmonoxide_fops = {
 	read: carbonmonoxide_read,
@@ -61,20 +62,22 @@ static const int carbonmonoxide_major = 61;
 static char *user_input;
 
 // Buffer to store data to send to user
-static char *user_output;
-
-float voltage_value;
 
 
-void mytimer_callback(struct timer_list *timer)
+#define THRESHOLD 500
+
+
+
+static void mytimer_callback(struct timer_list *timer)
 {
-    int value;
-    value = gpio_get_value(MQ7_PIN);
-    voltage_value = value;
-    printk("Voltage : %f \n",voltage_value);
+    int value = gpio_get_value(MQ7_PIN);
+    if (value > THRESHOLD) {
+        printk("CO detected! Value: %d\n", value);
+    } else {
+        printk("CO not detected. Value: %d\n", value);
+    }
     mod_timer(&mytimer, jiffies + msecs_to_jiffies(1000)); // mod timer for 1 second
 }
-
 
 
 
@@ -136,40 +139,7 @@ static int carbonmonoxide_release(struct inode *inode, struct file *filp)
 
 static ssize_t carbonmonoxide_read(struct file *filp, char *buf, size_t count, loff_t *f_pos)
 { 
-	int temp;
-	char tbuf[256], *tbptr = tbuf;
-	unsigned int carbonmonoxide_len = strlen(user_output);
-
-	/* end of buffer reached */
-	if (*f_pos >= carbonmonoxide_len)
-	{
-		return 0;
-	}
-
-	/* do not go over the end */
-	if (count > carbonmonoxide_len - *f_pos)
-		count = carbonmonoxide_len - *f_pos;
-
-	/* Transfer data to user space */ 
-	if (copy_to_user(buf, user_output + *f_pos, count))
-	{
-		return -EFAULT;
-	}
-
-	/* Log the read operation */
-	tbptr += sprintf(tbptr, "read called: process id %d, command %s, count %zu, offset %lld chars",
-		current->pid, current->comm, count, *f_pos);
-
-	/* Add the read data to the log */
-	for (temp = *f_pos; temp < count + *f_pos; temp++)					  
-		tbptr += sprintf(tbptr, "%c", user_output[temp]);
-
-	/* Append the MQ7 sensor value to the output */
-
-
-	/* Reset output buffer */
-	strcpy(user_output, "");
-
+	
 	return count; 
 }
  
