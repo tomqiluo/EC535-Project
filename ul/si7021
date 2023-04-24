@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/i2c-dev.h>
+
+#define I2C_BUS 2
+#define SI7021_ADDRESS 0x40
+
+int main()
+{
+    int file;
+    char filename[20];
+    int addr = SI7021_ADDRESS;
+    char buf[10];
+
+    snprintf(filename, 19, "/dev/i2c-%d", I2C_BUS);
+    file = open(filename, O_RDWR);
+    if (file < 0) {
+        perror("Unable to open I2C bus");
+        exit(1);
+    }
+
+    if (ioctl(file, I2C_SLAVE, addr) < 0) {
+        perror("Unable to set I2C address");
+        exit(1);
+    }
+
+    // Send command to measure temperature
+    buf[0] = 0xF3;
+    if (write(file, buf, 1) != 1) {
+        perror("Unable to write to I2C bus");
+        exit(1);
+    }
+
+    usleep(100000);  // Wait for measurement to complete
+
+    // Read temperature data
+    if (read(file, buf, 2) != 2) {
+        perror("Unable to read from I2C bus");
+        exit(1);
+    }
+
+    int temperature = ((buf[0] << 8) | buf[1]);
+    float celsius = ((175.72 * temperature) / 65536) - 46.85;
+    float fahrenheit = (celsius * 1.8) + 32;
+
+    printf("Temperature: %.2f C (%.2f F)\n", celsius, fahrenheit);
+
+    // Send command to measure humidity
+    buf[0] = 0xF5;
+    if (write(file, buf, 1) != 1) {
+        perror("Unable to write to I2C bus");
+        exit(1);
+    }
+
+    usleep(100000);  // Wait for measurement to complete
+
+    // Read humidity data
+    if (read(file, buf, 2) != 2) {
+        perror("Unable to read from I2C bus");
+        exit(1);
+    }
+
+    int humidity = ((buf[0] << 8) | buf[1]);
+    float relative_humidity = ((125 * humidity) / 65536) - 6;
+
+    printf("Relative Humidity: %.2f %%\n", relative_humidity);
+
+    close(file);
+
+    return 0;
+}
