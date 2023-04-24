@@ -1,6 +1,8 @@
-ktimer: userspace.c
-	arm-linux-gnueabihf-gcc userspace.c -o userspace -static -s
-
+make: ccs811.c si7021.c i2c.c mq7.c
+	arm-linux-gnueabihf-gcc -s -static ccs811.c -o ccs811
+	arm-linux-gnueabihf-gcc -s -static si7021.c -o si7021
+	arm-linux-gnueabihf-gcc -s -static i2c.c -o i2c
+	arm-linux-gnueabihf-gcc -s -static mq7.c -o mq7
+	
 clean:
-	rm userspace
-
+	rm ccs811 si7021 i2c mq7
