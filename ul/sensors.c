@@ -4,12 +4,17 @@
 #include <unistd.h>
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
+#include <string.h>
+#include <errno.h>
+
 
 #define CCS811_ADDR 0x5B
 #define SI7021_ADDR 0x40
 
 #define MQ7_PIN "/sys/class/gpio/gpio67/value"
 #define BUFFER_SIZE 100
+
+#define GPIO_PATH "/sys/class/gpio"
 
 void ccs811_init(int file)
 {
@@ -43,6 +48,7 @@ float si7021_read_temperature(int file)
 
 int main()
 {
+    int gpio68_fd, gpio44_fd, gpio26_fd;
     int file1, file2;
     char filename[20];
     int adapter_nr = 2; /* Change to 1 for Beaglebone Black Wireless */
@@ -78,6 +84,48 @@ int main()
     system("echo 67 > /sys/class/gpio/export");
     // Set direction of GPIO pin to input
     system("echo in > /sys/class/gpio/gpio67/direction");
+
+    // Set the direction of the GPIO pins to output
+    gpio68_fd = open(GPIO_PATH "/gpio68/direction", O_WRONLY);
+    write(gpio68_fd, "out", strlen("out"));
+    close(gpio68_fd);
+
+    gpio44_fd = open(GPIO_PATH "/gpio44/direction", O_WRONLY);
+    write(gpio44_fd, "out", strlen("out"));
+    close(gpio44_fd);
+
+    gpio26_fd = open(GPIO_PATH "/gpio26/direction", O_WRONLY);
+    write(gpio26_fd, "out", strlen("out"));
+    close(gpio26_fd);
+
+    // Turn on the LED lights
+    gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
+    write(gpio68_fd, "1", strlen("1"));
+    close(gpio68_fd);
+
+    gpio44_fd = open(GPIO_PATH "/gpio44/value", O_WRONLY);
+    write(gpio44_fd, "1", strlen("1"));
+    close(gpio44_fd);
+
+    gpio26_fd = open(GPIO_PATH "/gpio26/value", O_WRONLY);
+    write(gpio26_fd, "1", strlen("1"));
+    close(gpio26_fd);
+
+    // Wait for a second
+    sleep(1);
+
+    // Turn off the LED lights
+    gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
+    write(gpio68_fd, "0", strlen("0"));
+    close(gpio68_fd);
+
+    gpio44_fd = open(GPIO_PATH "/gpio44/value", O_WRONLY);
+    write(gpio44_fd, "0", strlen("0"));
+    close(gpio44_fd);
+
+    gpio26_fd = open(GPIO_PATH "/gpio26/value", O_WRONLY);
+    write(gpio26_fd, "0", strlen("0"));
+    close(gpio26_fd);
 
     while (1) {
         FILE *fp;
@@ -132,6 +180,43 @@ int main()
         close(mq7_pin_fd);
 
         fprintf(fp,"%d, %d, %.2f, %.2f, %d\n", co2, voc, humidity, temperature, co_ppm);
+	if (co2>1000) {
+		gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
+    		write(gpio68_fd, "0", strlen("0"));
+    		close(gpio68_fd);
+
+    		gpio44_fd = open(GPIO_PATH "/gpio44/value", O_WRONLY);
+    		write(gpio44_fd, "1", strlen("1"));
+    		close(gpio44_fd);
+
+    		gpio26_fd = open(GPIO_PATH "/gpio26/value", O_WRONLY);
+    		write(gpio26_fd, "0", strlen("0"));
+    		close(gpio26_fd);
+        } else if (co_ppm > 0) {
+        	gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
+    		write(gpio68_fd, "0", strlen("0"));
+    		close(gpio68_fd);
+
+    		gpio44_fd = open(GPIO_PATH "/gpio44/value", O_WRONLY);
+    		write(gpio44_fd, "0", strlen("0"));
+    		close(gpio44_fd);
+
+    		gpio26_fd = open(GPIO_PATH "/gpio26/value", O_WRONLY);
+    		write(gpio26_fd, "1", strlen("1"));
+    		close(gpio26_fd);
+        } else {
+		gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
+    		write(gpio68_fd, "1", strlen("1"));
+    		close(gpio68_fd);
+
+    		gpio44_fd = open(GPIO_PATH "/gpio44/value", O_WRONLY);
+    		write(gpio44_fd, "0", strlen("0"));
+    		close(gpio44_fd);
+
+    		gpio26_fd = open(GPIO_PATH "/gpio26/value", O_WRONLY);
+    		write(gpio26_fd, "0", strlen("0"));
+    		close(gpio26_fd);
+	} 
         fclose(fp);
         usleep(500000);
     }
