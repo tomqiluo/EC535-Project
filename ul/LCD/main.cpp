@@ -17,10 +17,11 @@
 int main(int argc, char * argv[]) {
   QApplication app(argc, argv);
 
-  QTabWidget * tabWidget = new QTabWidget;
-  tabWidget -> setTabPosition(QTabWidget::West);
-  tabWidget -> setTabShape(QTabWidget::Triangular);
+  QTabWidget *tabWidget = new QTabWidget;
+tabWidget->setStyleSheet("QTabWidget::tab-bar:selected {background-color: blue;}"
+                         "QTabBar::tab { font-size: 16px; padding: 10px; border: 2px solid gray; }");
 
+  tabWidget->setTabPosition(QTabWidget::South);
   Settings * settings = new Settings(tabWidget);
   MainMenu * mainMenu = new MainMenu(tabWidget);
   Sensors * coData = new Sensors("CO", "", "ppm", tabWidget);
@@ -41,7 +42,7 @@ int main(int argc, char * argv[]) {
   tabWidget -> show();
 
   // Set up a timer to read the text file once a second
-  QFile file("sampledata.txt");
+  QFile file("data.txt");
   QTextStream in ( & file);
   QStringList lines;
   while (!in.atEnd()) {
@@ -49,31 +50,51 @@ int main(int argc, char * argv[]) {
     lines.append(line);
   }
   file.close();
-
-  QTimer * timer = new QTimer;
+QTimer *timer = new QTimer;
   int nextLine = 0; // Variable to keep track of the next line to read from the file
-  QObject::connect(timer, & QTimer::timeout, [ & ]() {
-    QFile file("sampledata.txt");
+
+  // Read the last line of the text file
+  QString lastLine;
+ 
+  if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+      QString line = in.readLine();
+      if (!line.isEmpty()) {
+        lastLine = line;
+      }
+    }
+    file.close();
+  }
+
+  QObject::connect(timer, &QTimer::timeout, [&]() {
+    QFile file("data.txt");
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      QTextStream in ( & file);
+      QTextStream in(&file);
       for (int i = 0; i < nextLine; i++) {
         in.readLine(); // Skip lines that have already been read
       }
-      QString line = in.readLine();
+      QString line;
+      while (!in.atEnd()) {
+        line = in.readLine();
+      }
       if (!line.isEmpty()) {
+        lastLine = line;
         QStringList fields = line.split(",");
         if (fields.count() == 5) { // Update count to 5 for temperature and VOC data
           // Update the sensor data labels with formatted data
-          QString coDataLabel = QString("CO: %1 ppm").arg(fields[0].trimmed());
-          QString co2DataLabel = QString("CO2: %1 ppm").arg(fields[1].trimmed());
+     
+          QString co2DataLabel = QString("CO2: %1 ppm").arg(fields[0].trimmed());
+ 	QString vocDataLabel = QString("VOC: %1 ppb").arg(fields[1].trimmed());
           QString humidityDataLabel = QString("Humidity: %1 %").arg(fields[2].trimmed());
           QString temperatureDataLabel = QString("Temperature: %1 °C").arg(fields[3].trimmed());
-          QString vocDataLabel = QString("VOC: %1 ppb").arg(fields[4].trimmed());
-          coData -> setDataLabel(coDataLabel);
-          co2Data -> setDataLabel(co2DataLabel);
-          humidityData -> setDataLabel(humidityDataLabel);
-          temperatureData -> setDataLabel(temperatureDataLabel);
-          vocData -> setDataLabel(vocDataLabel);
+     QString coDataLabel = QString("CO: %1 ppm").arg(fields[4].trimmed());
+         
+          coData->setDataLabel(coDataLabel);
+          co2Data->setDataLabel(co2DataLabel);
+          humidityData->setDataLabel(humidityDataLabel);
+          temperatureData->setDataLabel(temperatureDataLabel);
+          vocData->setDataLabel(vocDataLabel);
         }
         nextLine++; // Increment the nextLine variable
       }
@@ -81,7 +102,7 @@ int main(int argc, char * argv[]) {
     }
   });
 
-  timer -> start(1000);
+  timer->start(1000);
 
   return app.exec();
 }
