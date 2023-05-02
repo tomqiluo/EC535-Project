@@ -16,3 +16,21 @@ The Air Quality Monitoring System is an embedded system based on the BeagleBone 
     * Yellow: Changing environment
     * Red: Dangerous CO levels
 * Suitable for various environments, including residential, commercial, and industrial settings
+
+## Prerequisites
+
+* BeagleBone Black (or compatible) embedded platform
+* CCS811 air quality sensor
+* SI7021 temperature and humidity sensor
+* Flying-fish MQ-7 gas sensor
+* 4.3" LCD screen
+* Red, yellow, and green LEDs
+* Jumper wires and breadboard (or PCB for a more permanent solution)
+
+## Getting Started
+
+1. Assemble the hardware components as per the provided circuit diagram.
+2. Connect the sensors and LEDs to the appropriate pins on the BeagleBone Black.
+3. Attach the 4.3" LCD screen to the BeagleBone Black.
+
+
