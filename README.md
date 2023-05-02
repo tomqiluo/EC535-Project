@@ -32,13 +32,6 @@ The Air Quality Monitoring System is an embedded system based on the BeagleBone 
 1. Assemble the hardware components as per the provided circuit diagram.
 2. Connect the sensors and LEDs to the appropriate pins on the BeagleBone Black.
 3. Attach the 4.3" LCD screen to the BeagleBone Black.
-4. In *EC535-Project/Sensor*, run
-    `make`
-to generate a exectuable file **sensor**.
-5. In *EC535-Project/LCD*, run
-    `qmake`
-to generate a **Makefile**.
-Then, run
-    `make`
-to Generate a exectuable file **lcd**.
-6. 
+
+## Booting Up the LCD Application
+In LCD directory run lcd.pro by typing "qmake" which will generate the MakeFile, after that type "make" to generate the executable
