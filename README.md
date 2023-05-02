@@ -49,8 +49,8 @@ to Generate a exectuable file **lcd**.
 8. Enjoy the program.
 
 ## Contributors
-Qi Luo [tomqiluo@bu.edu]: Sensors
-Ahmet Caliskan [aeclskn@bu.edu]: Qt Program
+* Ahmet Caliskan [aeclskn@bu.edu]: Qt Program
+* Qi Luo [tomqiluo@bu.edu]: Sensors
 
 ## Acknowledgements
 This is our culminating project for ENG EC535. We have made this repository public in the hopes of aiding others in achieving success in embedded systems. The two of us have gained a wealth of knowledge from this course.
