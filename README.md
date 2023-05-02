@@ -3,6 +3,7 @@
 ## Overview
 
 The Air Quality Monitoring System is an embedded system based on the BeagleBone platform, designed to monitor air quality in real-time. The system is capable of measuring various parameters, such as CO2, CO, VOC, temperature, and humidity levels, providing crucial information for maintaining a safe and healthy environment.
+![Air Quality Monitoring System](/Media/image.jpg)
 
 ## Features
 
