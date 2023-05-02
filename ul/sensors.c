@@ -131,7 +131,7 @@ int main()
         FILE *fp;
         char str[100];
 
-        fp = fopen("data.csv", "a");
+        fp = fopen("data.txt", "a");
         if(fp == NULL) {
            perror("Error opening file");
            return(-1);
@@ -171,7 +171,8 @@ int main()
         voltage = (float)value / 4096 * 1.8;
 
         // Calculate CO concentration in ppm using a conversion factor of 60mV/ppm (from datasheet)
-        co_ppm = voltage / 0.06;
+        // co_ppm = voltage / 0.06;
+	co_ppm = 1;
 
         // Print result
         //printf("CO Concentration: %f ppm\n", co_ppm);
@@ -179,18 +180,18 @@ int main()
         // Close file descriptor
         close(mq7_pin_fd);
 
-        fprintf(fp,"%d, %d, %.2f, %.2f, %d\n", co2, voc, humidity, temperature, co_ppm);
+        fprintf(fp,"%d, %d, %.2f, %.2f, %d\n", co2, voc, humidity, temperature, 1);
 	if (co2>1000) {
 		gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
     		write(gpio68_fd, "0", strlen("0"));
     		close(gpio68_fd);
 
     		gpio44_fd = open(GPIO_PATH "/gpio44/value", O_WRONLY);
-    		write(gpio44_fd, "1", strlen("1"));
+    		write(gpio44_fd, "0", strlen("0"));
     		close(gpio44_fd);
 
     		gpio26_fd = open(GPIO_PATH "/gpio26/value", O_WRONLY);
-    		write(gpio26_fd, "0", strlen("0"));
+    		write(gpio26_fd, "1", strlen("1"));
     		close(gpio26_fd);
         } else if (co_ppm > 0) {
         	gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
@@ -205,7 +206,7 @@ int main()
     		write(gpio26_fd, "1", strlen("1"));
     		close(gpio26_fd);
         } else {
-		gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
+		    gpio68_fd = open(GPIO_PATH "/gpio68/value", O_WRONLY);
     		write(gpio68_fd, "1", strlen("1"));
     		close(gpio68_fd);
 
