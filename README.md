@@ -41,4 +41,16 @@ to generate a **Makefile**.
 Then, run
     `make`
 to Generate a exectuable file **lcd**.
-6. 
+6. Connect the PC to Baglebone Black, and transfer **sensor** and **lcd** to it.
+7. In the same directory as you store those two executables, run
+    `./sensor &`
+    and
+    `./lcd`.
+8. Enjoy the program.
+
+## Contributors
+Qi Luo [tomqiluo@bu.edu]: Sensors
+Ahmet Caliskan [aeclskn@bu.edu]: Qt Program
+
+## Acknowledgements
+This is our culminating project for ENG EC535. We have made this repository public in the hopes of aiding others in achieving success in embedded systems. The two of us have gained a wealth of knowledge from this course.
